@@ -380,7 +380,7 @@ burger.addEventListener('click',()=>navLinks.classList.toggle('open'));
 navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLinks.classList.remove('open')));
 
 if(!reduce){
-  const lenis=new Lenis({lerp:.09,wheelMultiplier:.95});
+  const lenis=new Lenis({lerp:0.2, wheelMultiplier:1, smoothWheel:true, syncTouch:false});
   function raf(t){lenis.raf(t);requestAnimationFrame(raf);}requestAnimationFrame(raf);
   gsap.registerPlugin(ScrollTrigger);
   lenis.on('scroll',ScrollTrigger.update);
