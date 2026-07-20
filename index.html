@@ -201,7 +201,7 @@ header.scrolled{background:rgba(26,20,17,.86);backdrop-filter:blur(14px);box-sha
 .burger span{width:24px;height:2px;background:var(--cream);transition:.3s}
 
 /* HERO */
-.hero{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
+.hero{position:relative;min-height:100vh;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden}
 .hero-bg{position:absolute;inset:0;z-index:0}
 .hero-bg img{width:100%;height:100%;object-fit:cover}
 .hero-bg::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 70%,rgba(224,123,57,.18) 0%,transparent 55%),linear-gradient(180deg,rgba(26,20,17,.72) 0%,rgba(26,20,17,.6) 45%,rgba(26,20,17,.93) 100%)}
@@ -657,8 +657,9 @@ burger.addEventListener('click',()=>navLinks.classList.toggle('open'));
 navLinks.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>navLinks.classList.remove('open')));
 
 if(!reduce){
-  const lenis=new Lenis({lerp:0.2, wheelMultiplier:1, smoothWheel:true, syncTouch:false});
-  function raf(t){lenis.raf(t);requestAnimationFrame(raf);}requestAnimationFrame(raf);
+  const lenis=new Lenis({lerp:0.1, wheelMultiplier:1, smoothWheel:true, syncTouch:false}); window.__lenis = lenis;
+  gsap.ticker.add(function(t){ lenis.raf(t*1000); });
+  gsap.ticker.lagSmoothing(0);
   gsap.registerPlugin(ScrollTrigger);
   lenis.on('scroll',ScrollTrigger.update);
 
@@ -680,6 +681,48 @@ if(!reduce){
   document.querySelectorAll('.reveal').forEach(e=>{e.style.opacity=1;e.style.transform='none';});
   document.querySelectorAll('.hero .word>span').forEach(e=>e.style.transform='none');
 }
+</script>
+
+<script>
+/* QA scroll-fix — glatko, bez lomova i preskakanja (mobitel prioritet) */
+(function(){
+  var lenis = window.__lenis || null;
+
+  /* jedinstveni smooth-scroll ulaz: Lenis ako postoji, inače nativni */
+  window.__smoothTo = function(target){
+    var el = (typeof target === 'string') ? document.querySelector(target) : target;
+    if(!el) return;
+    if(lenis){ lenis.scrollTo(el, {offset:0, duration:1.1}); }
+    else { el.scrollIntoView({behavior:'smooth', block:'start'}); }
+  };
+
+  /* anchor linkovi kroz isti ulaz — nema nativnog skoka preko Lenisa */
+  document.querySelectorAll('a[href^="#"]').forEach(function(a){
+    var href = a.getAttribute('href');
+    if(!href || href === '#') return;
+    a.addEventListener('click', function(e){
+      var el = document.querySelector(href);
+      if(!el) return;
+      e.preventDefault();
+      window.__smoothTo(el);
+      if(history.replaceState) history.replaceState(null, '', href);
+    });
+  });
+
+  /* ScrollTrigger pozicije preračunati kad se layout slegne (slike!) */
+  if(window.ScrollTrigger){
+    var refresh = function(){ ScrollTrigger.refresh(); };
+    window.addEventListener('load', refresh);
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(refresh);
+    document.querySelectorAll('img').forEach(function(img){
+      if(!img.complete) img.addEventListener('load', refresh, {once:true});
+    });
+    var rt; window.addEventListener('resize', function(){
+      clearTimeout(rt); rt = setTimeout(refresh, 150);
+    }, {passive:true});
+    setTimeout(refresh, 600);
+  }
+})();
 </script>
 </body>
 </html>
