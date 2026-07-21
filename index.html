@@ -170,7 +170,9 @@
   --cream:#F4E9DA; --cream-d:rgba(244,233,218,.66); --olive:#9DA06A; --line:rgba(244,233,218,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+/* NE smooth: Lenis sam animira scroll preko window.scrollTo(); nativni smooth
+   bi svaki taj frame dodatno usporio pa scroll puzi i ne stigne do cilja. */
+html{scroll-behavior:auto}
 body{
   font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);
   line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;
